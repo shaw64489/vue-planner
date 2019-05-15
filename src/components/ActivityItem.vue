@@ -1,6 +1,6 @@
 <template>
   <article class="post">
-    <h4>{{activity.title}}</h4>
+    <h4>{{ activity.title }}</h4>
     <div class="media">
       <div class="media-left">
         <p class="image is-32x32">
@@ -11,7 +11,7 @@
         <div class="content">
           <p>
             <a href="#">Filip Jerga</a>
-            updated {{activity.updatedAt}} minutes ago &nbsp;
+            updated {{ activity.updatedAt }} minutes ago &nbsp;
           </p>
         </div>
       </div>
@@ -24,10 +24,14 @@
 
 <script>
 export default {
-    props: ['activity']
+  props: {
+    activity: {
+      type: Object,
+      required: true
+    }
+  }
 };
 </script>
 
 <style scoped>
-
 </style>
