@@ -7,17 +7,7 @@
         </div>
       </div>
     </nav>
-    <nav class="navbar is-white">
-      <div class="container">
-        <div class="navbar-menu">
-          <div class="navbar-start">
-            <a class="navbar-item is-active" href="#">Newest</a>
-            <a class="navbar-item" href="#">In Progress</a>
-            <a class="navbar-item" href="#">Finished</a>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <TheNavbar />
 
     <section class="container">
       <div class="columns">
@@ -27,10 +17,16 @@
           <!-- Activity Form End -->
         </div>
         <div class="column is-9">
-          <div class="box content">
-            <ActivityItem v-for="activity in activities" :activity="activity" :key="activity.id"/>
-            <div class="activity-length">Currently {{ activityLength }} activities</div>
-            <div class="activity-motivation">{{ activityMotivation }}</div>
+          <div class="box content" :class="{fetching: isFetching, 'has-error': error}">
+            <div v-if="error">{{ error }}</div>
+            <div v-else>
+              <div v-if="isFetching">Loading...</div>
+              <ActivityItem v-for="activity in activities" :activity="activity" :key="activity.id"/>
+            </div>
+            <div v-if="!isFetching">
+              <div class="activity-length">Currently {{ activityLength }} activities</div>
+              <div class="activity-motivation">{{ activityMotivation }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -39,17 +35,20 @@
 </template>
 
 <script>
+import Vue from "vue";
 import ActivityItem from "@/components/ActivityItem";
 import ActivityCreate from "@/components/ActivityCreate";
+import TheNavbar from "@/components/TheNavbar";
 import { fetchActivities, fetchCategories, fetchUser } from "@/api";
 export default {
   name: "app",
-  components: { ActivityItem, ActivityCreate },
+  components: { ActivityItem, ActivityCreate, TheNavbar },
   data() {
     return {
       creator: "Chris Shaw",
       appName: "Activity Planner",
-      watchedAppName: "Activity Planner by Chris Shaw",
+      isFetching: false,
+      error: null,
       user: {},
       activities: {},
       categories: {}
@@ -73,12 +72,24 @@ export default {
     }
   },
   created() {
-    this.activities = fetchActivities();
+    this.isFetching = true;
+    fetchActivities()
+      .then(activities => {
+        this.activities = activities;
+        this.isFetching = false;
+      })
+      .catch(err => {
+        this.error = err;
+        this.isFetching = false;
+      });
+
     this.categories = fetchCategories();
     this.user = fetchUser();
   },
   methods: {
     addActivity(newActivity) {
+      // this.activities[newActivity.id] = newActivity;
+      Vue.set(this.activities, newActivity.id, newActivity);
       console.log(newActivity);
     }
   }
@@ -101,6 +112,15 @@ body {
 footer {
   background-color: #f2f6fa !important;
 }
+
+.fetching {
+  border: 2px solid orange;
+}
+
+.has-error {
+  border: 2px solid red;
+}
+
 .activity-motivation {
   float: right;
 }
