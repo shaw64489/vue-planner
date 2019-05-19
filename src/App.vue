@@ -1,5 +1,5 @@
 <template>
-  <div id="activityApp">
+  <div v-if="isDataLoaded" id="activityApp">
     <nav class="navbar is-white topNav">
       <div class="container">
         <div class="navbar-brand">
@@ -7,7 +7,7 @@
         </div>
       </div>
     </nav>
-    <TheNavbar />
+    <TheNavbar/>
 
     <section class="container">
       <div class="columns">
@@ -21,7 +21,13 @@
             <div v-if="error">{{ error }}</div>
             <div v-else>
               <div v-if="isFetching">Loading...</div>
-              <ActivityItem v-for="activity in activities" :activity="activity" :key="activity.id"/>
+              <ActivityItem
+                v-for="activity in activities"
+                :activity="activity"
+                :categories="categories"
+                :key="activity.id"
+                @activityDeleted="handleActivityDelete"
+              />
             </div>
             <div v-if="!isFetching">
               <div class="activity-length">Currently {{ activityLength }} activities</div>
@@ -39,7 +45,7 @@ import Vue from "vue";
 import ActivityItem from "@/components/ActivityItem";
 import ActivityCreate from "@/components/ActivityCreate";
 import TheNavbar from "@/components/TheNavbar";
-import { fetchActivities, fetchCategories, fetchUser } from "@/api";
+import { fetchActivities, fetchCategories, fetchUser, deleteActivityAPI } from "@/api";
 export default {
   name: "app",
   components: { ActivityItem, ActivityCreate, TheNavbar },
@@ -50,8 +56,8 @@ export default {
       isFetching: false,
       error: null,
       user: {},
-      activities: {},
-      categories: {}
+      activities: null,
+      categories: null
     };
   },
   computed: {
@@ -69,6 +75,9 @@ export default {
       } else {
         return "No activities, so sad :(";
       }
+    },
+    isDataLoaded() {
+      return this.categories && this.activities;
     }
   },
   created() {
@@ -83,14 +92,21 @@ export default {
         this.isFetching = false;
       });
 
-    this.categories = fetchCategories();
+    fetchCategories().then(categories => {
+      this.categories = categories;
+    });
     this.user = fetchUser();
   },
   methods: {
     addActivity(newActivity) {
       // this.activities[newActivity.id] = newActivity;
       Vue.set(this.activities, newActivity.id, newActivity);
-      console.log(newActivity);
+      
+    },
+    handleActivityDelete (activity) {
+      deleteActivityAPI(activity).then(deletedActivity => {
+        Vue.delete(this.activities, deletedActivity.id)
+      });
     }
   }
 };
