@@ -13,7 +13,7 @@
       <div class="columns">
         <div class="column is-3">
           <!-- Activity Form Begin -->
-          <ActivityCreate @activityCreated="addActivity" :categories="categories"/>
+          <ActivityCreate :categories="categories"/>
           <!-- Activity Form End -->
         </div>
         <div class="column is-9">
@@ -26,7 +26,6 @@
                 :activity="activity"
                 :categories="categories"
                 :key="activity.id"
-                @activityDeleted="handleActivityDelete"
               />
             </div>
             <div v-if="!isFetching">
@@ -42,7 +41,7 @@
 
 <script>
 import Vue from "vue";
-import store from './store'
+import store from "./store";
 import ActivityItem from "@/components/ActivityItem";
 import ActivityCreate from "@/components/ActivityCreate";
 import TheNavbar from "@/components/TheNavbar";
@@ -51,7 +50,9 @@ export default {
   name: "app",
   components: { ActivityItem, ActivityCreate, TheNavbar },
   data() {
-    const { state: { activities, categories } } = store;
+    const {
+      state: { activities, categories }
+    } = store;
     return {
       creator: "Chris Shaw",
       appName: "Activity Planner",
@@ -78,13 +79,20 @@ export default {
         return "No activities, so sad :(";
       }
     },
+    activitiesLength() {
+      return Object.keys(this.activities).length;
+    },
+    categoriesLength() {
+      return Object.keys(this.categories).length;
+    },
     isDataLoaded() {
-      return this.categories && this.activities;
+      return this.categoriesLength && this.activitiesLength;
     }
   },
   created() {
     this.isFetching = true;
-    store.fetchActivities()
+    store
+      .fetchActivities()
       .then(activities => {
         this.isFetching = false;
       })
@@ -93,21 +101,8 @@ export default {
         this.isFetching = false;
       });
 
-    store.fetchCategories().then(categories => {
-    });
+    store.fetchCategories().then(categories => {});
     this.user = store.fetchUser();
-  },
-  methods: {
-    addActivity(newActivity) {
-      // this.activities[newActivity.id] = newActivity;
-      Vue.set(this.activities, newActivity.id, newActivity);
-      
-    },
-    handleActivityDelete (activity) {
-      store.deleteActivityAPI(activity).then(deletedActivity => {
-        Vue.delete(this.activities, deletedActivity.id)
-      });
-    }
   }
 };
 </script>

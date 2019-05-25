@@ -9,22 +9,22 @@ const store = {
 
     fetchActivities() {
         return fakeApi.get('activities', { force: 1 })
-        .then(activities => {
+            .then(activities => {
 
-            Object.keys(activities).forEach((key) => {
-                Vue.set(this.state.activities, key, activities[key])
+                Object.keys(activities).forEach(key => {
+                    this.setItem('activities', key, activities[key])
+                })
+                return activities;
             })
-            return activities;
-        })
     },
     fetchCategories() {
         return fakeApi.get('categories', { force: 1 })
-        .then(categories => {
-            Object.keys(categories).forEach((key) => {
-                Vue.set(this.state.categories, key, categories[key])
+            .then(categories => {
+                Object.keys(categories).forEach(key => {
+                    this.setItem('categories', key, categories[key])
+                })
+                return categories;
             })
-            return categories;
-        })
     },
     fetchUser() {
         return {
@@ -32,18 +32,27 @@ const store = {
             id: "-Aj34jknvncx98812"
         }
     },
-    createActivityAPI(activity) {
+    createActivity(activity) {
 
         activity.id = this.generateUid();
         activity.progress = 0;
         activity.createdAt = new Date();
         activity.updatedAt = new Date();
 
-        return fakeApi.post('activities', activity);
+        return fakeApi.post('activities', activity)
+            .then(createdActivity => {
+                this.setItem('activities', createdActivity.id, createdActivity)
+            });
     },
-    deleteActivityAPI(activity) {
-
-        return fakeApi.delete('activities', activity);
+    deleteActivity(activity) {
+        return fakeApi.delete('activities', activity)
+        .then(deletedActivity => {
+            Vue.delete(this.state.activities, activity.id)
+            return deletedActivity
+        })
+    },
+    setItem(resource, id, item) {
+        Vue.set(this.state[resource], id, item)
     }
 
 }

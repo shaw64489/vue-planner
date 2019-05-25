@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { createActivityAPI } from "@/api";
+import store from "@/store";
 export default {
   props: {
     categories: {
@@ -94,9 +94,9 @@ export default {
       this.isFormDisplayed = false;
     },
     createActivity() {
-      createActivityAPI({ ...this.newActivity }).then(activity => {
+      store.createActivity({ ...this.newActivity }).then(activity => {
         this.resetActivity();
-        this.$emit("activityCreated", { ...activity });
+        this.isFormDisplayed = false;
       });
     }
   }

@@ -36,6 +36,7 @@
 
 <script>
 import textUtility from "@/mixins/textUtility";
+import store from '@/store'
 export default {
   mixins: [textUtility],
   props: {
@@ -67,8 +68,7 @@ export default {
   },
   methods: {
     deleteActivity() {
-
-        this.$emit("activityDeleted", this.activity);
+        store.deleteActivity(this.activity)
     }
   }
 };

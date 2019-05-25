@@ -1,13 +1,13 @@
 <template>
   <article class="post">
     <div class="activity-title">
-      <!-- TODO: Add v-model -->
-      <input v-model="activity.title" type="text" class="input">
       <i class="fas fa-cog activity-settings" @click="isMenuDisplayed = !isMenuDisplayed"/>
+      <!-- TODO: Add v-model -->
+      <input v-model="updatedActivity.title" type="text" class="input">
     </div>
     <div class="activity-category">
       <!-- TODO: add v-model and iterate categories in option  -->
-      <select v-model="activity.category" class="select">
+      <select v-model="updatedActivity.category" class="select">
         <option disabled value>Please select one</option>
         <option
           v-for="category in categories"
@@ -18,7 +18,7 @@
     </div>
     <div class="control activity-notes">
       <!-- TODO: Add v-model here -->
-      <textarea v-model="activity.notes" class="textarea" placeholder="Write some notes here"/>
+      <textarea v-model="updatedActivity.notes" class="textarea" placeholder="Write some notes here"/>
     </div>
     <div class="media">
       <div class="media-left">
@@ -30,7 +30,7 @@
         <div class="content">
           <p>
             <a href="#">Filip Jerga</a>
-            updated {{ activity.updatedAt | prettyTime }} &nbsp;
+            updated {{ updatedActivity.updatedAt | prettyTime }} &nbsp;
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@
         <!-- TODO: Add v-model here -->
         <input
           id="progress"
-          v-model="activity.progress"
+          v-model="updatedActivity.progress"
           type="range"
           name="progress"
           min="0"
@@ -46,7 +46,7 @@
           value="90"
           step="10"
         >
-        <label for="progress">{{ activity.progress }} %</label>
+        <label for="progress">{{ updatedActivity.progress }} %</label>
       </div>
     </div>
     <div v-if="isMenuDisplayed" class="activity-control">
@@ -72,15 +72,16 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
-      isMenuDisplayed: false
-    }
+      isMenuDisplayed: true,
+      updatedActivity: {...this.activity}
+    };
   },
   methods: {
-      updateActivity() {
-          console.log(this.activity);
-      }
+    updateActivity() {
+      console.log(this.activity);
+    }
   }
 };
 </script>
@@ -104,13 +105,17 @@ export default {
 
 .activity-title {
   margin-bottom: 5px;
+
+  > i {
+    margin-bottom: 10px;
+  }
 }
 .activity-category {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .activity-notes {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 .activity-settings {
   float: right;
