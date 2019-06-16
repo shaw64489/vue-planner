@@ -38,7 +38,7 @@
         <!-- TODO: Add v-model here -->
         <input
           id="progress"
-          v-model="updatedActivity.progress"
+          v-model.number="updatedActivity.progress"
           type="range"
           name="progress"
           min="0"
@@ -60,6 +60,7 @@
 
 <script>
 import textUtility from "@/mixins/textUtility";
+import store from '@/store';
 export default {
   mixins: [textUtility],
   props: {
@@ -80,7 +81,10 @@ export default {
   },
   methods: {
     updateActivity() {
-      console.log(this.activity);
+      store.updateActivity(this.updatedActivity)
+        .then(() => {
+          this.$emit('toggleUpdate', false)
+        })
     }
   }
 };

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isDataLoaded" id="activityApp">
+  <div id="activityApp">
     <nav class="navbar is-white topNav">
       <div class="container">
         <div class="navbar-brand">
@@ -7,7 +7,7 @@
         </div>
       </div>
     </nav>
-    <TheNavbar/>
+    <TheNavbar @filterSelected="setFilter"/>
 
     <section class="container">
       <div class="columns">
@@ -21,12 +21,14 @@
             <div v-if="error">{{ error }}</div>
             <div v-else>
               <div v-if="isFetching">Loading...</div>
-              <ActivityItem
-                v-for="activity in activities"
-                :activity="activity"
-                :categories="categories"
-                :key="activity.id"
-              />
+              <div v-if="isDataLoaded">
+                <ActivityItem
+                  v-for="activity in filteredActivities"
+                  :activity="activity"
+                  :categories="categories"
+                  :key="activity.id"
+                />
+              </div>
             </div>
             <div v-if="!isFetching">
               <div class="activity-length">Currently {{ activityLength }} activities</div>
@@ -46,6 +48,7 @@ import ActivityItem from "@/components/ActivityItem";
 import ActivityCreate from "@/components/ActivityCreate";
 import TheNavbar from "@/components/TheNavbar";
 //import { fetchActivities, fetchCategories, fetchUser, deleteActivityAPI } from "@/api";
+import fakeApi from "@/lib/fakeApi";
 export default {
   name: "app",
   components: { ActivityItem, ActivityCreate, TheNavbar },
@@ -60,10 +63,36 @@ export default {
       error: null,
       user: {},
       activities,
-      categories
+      categories,
+      filter: "all"
     };
   },
   computed: {
+    filteredActivities() {
+      let filteredActivities = {};
+      let condition;
+      if (this.filter === "all") {
+        return this.activities;
+      }
+
+      if (this.filter === "inprogress") {
+        //assign function
+        condition = value => value > 0 && value < 100;
+      } else if (this.filter === "finished") {
+        //assign function
+        condition = value => value === 100;
+      } else {
+        //assign function
+        condition = value => value === 0;
+      }
+
+      //transform into array and filter
+      filteredActivities = Object.values(this.activities).filter(activity => {
+        return condition(activity.progress);
+      });
+
+      return filteredActivities;
+    },
     fullAppName() {
       return this.appName + " by " + this.creator;
     },
@@ -90,6 +119,8 @@ export default {
     }
   },
   created() {
+    // ONLY RUN ONCE TO POPULATE LOCALSTORAGE
+    // fakeApi.fillDB();
     this.isFetching = true;
     store
       .fetchActivities()
@@ -103,6 +134,11 @@ export default {
 
     store.fetchCategories().then(categories => {});
     this.user = store.fetchUser();
+  },
+  methods: {
+    setFilter(filterOption) {
+      this.filter = filterOption;
+    }
   }
 };
 </script>
